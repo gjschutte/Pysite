@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <div class="container-md">
+        <h1>New Route Comment</h1>
+        <h2>Route: {{ route.name }}</h2>
+
+        <form action="" method="post">
+            {% csrf_token %} 
+            {% include 'includes/bs_form.html' with form=form %}
+            <button class="btn btn-lg btn-primary" type="submit">Accept</button>
+        </form>
+    </div>
+{% endblock %}

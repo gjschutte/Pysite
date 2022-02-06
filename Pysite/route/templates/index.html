@@ -1,0 +1,54 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Top hiking routes</h1>
+    <p>This page gives an overview of all the hiking routes I walked in
+    the recent years. 
+    </p>
+    <p><strong>Number of routes: </strong> {{ num_route }}</p>
+    <p><strong>Total distance: </strong> {{ tot_distance }} km</p>
+
+    <p></p>
+    <h1>Recent hikes</h1>
+    <div class="row">
+        {% for route in latest_routes %}
+            <div class="col-sm-4">
+                <div class="polaroid">
+                    {% if route.photo != "No pic" %}
+                        <img class="index_foto" src="{{ route.photo.url }}" alt="connect">
+                    {% else %}
+                        No picture available yet
+                    {% endif %}
+                    <div class="subscription">
+                        <br>{{ route.name }}
+                        <br>Length: {{ route.length }} km
+                        <br><br> <a class="btn btn-primary button_extra" href="{{ route.get_absolute_url }}" role="button"> View the hike</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <p></p>
+    <h1>Hikes with the highest score</h1>
+    <div class="row">
+        {% for route in highest_routes %}
+            <div class="col-sm-4">
+                <div class="polaroid">
+                    {% if route.photo != "No pic" %}
+                        <img class="index_foto" src="{{ route.photo.url }}" alt="connect">
+                    {% else %}
+                        No picture available yet
+                    {% endif %}
+                    <div class="subscription">
+                        <br>{{ route.name }}
+                        <br>Length: {{ route.length }} km
+                        <br><br> <a class="btn btn-primary button_extra" href="{{ route.get_absolute_url }}" role="button"> View the hike</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Route list</h1>
+    <h2>{{ route_text }}</h2>
+
+    <div class="row">
+        <div class="col-sm-9">
+            {% if route_list %}
+                {% for route in route_list %}
+                    <br>
+                    <div class="row route-list">
+                        <div class="col-sm-3">
+                            {% if route.photo != "No pic" %}
+                                <img class="index_foto" src="{{ route.photo.url }}" alt="connect">
+                            {% else %}
+                                No picture available yet
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-9">
+                            <a href="{{ route.get_absolute_url }}">{{ route.name }}</a>
+                            <br>Length: {{ route.length }} km
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <br>
+        </div>
+        <div class="col-sm-3">
+            <p class="list-header">Route types</p>
+            <ul>
+                {% for type in types %}
+                    <li>
+                        <a href="{% url 'route-list-type' sel=2 pk=type.id %}">{{ type.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <br>
+            <p class="list-header">Provinces</p>
+            <ul>
+                {% for province in provinces %}
+                    <li>
+                        <a href="{% url 'route-list-type' sel=3 pk=province.id %}">{{ province.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

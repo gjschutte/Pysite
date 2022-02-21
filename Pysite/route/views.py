@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import generic
 import folium
+from folium import IFrame
 import gpxpy
 import gpxpy.gpx
 import os
@@ -12,30 +13,30 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 
-from .models import Route, Province, RouteComment, RoutePhoto
+from .models import Route, Type, Province, RouteComment, RoutePhoto
 from route.forms import CreateRouteForm, AddImageForm, CreateRouteCommentForm
 
 # Create your views here.
 
+def get_route_info(routeset):
+    # Generic function to retrieve some data about a set of routes
+    route_info = []
+    for route in routeset:
+
+        route = get_object_or_404(Route, pk=route.id)
+
+        # Select 1 picture per route
+        pics = RoutePhoto.objects.filter(route=route.id)[:1]    
+        if len(pics) != 0:
+            for pic in pics:
+                route.photo = pic.image
+        else:
+            route.photo = "No pic"            
+        route_info.append(route)
+    return route_info
+
 def index(request):
     """View function for home page of the site"""
-
-    def get_route_info(routeset):
-        route_info = []
-        for route in routeset:
-
-            route = get_object_or_404(Route, pk=route.id)
-
-            # Select 1 picture per route
-            pics = RoutePhoto.objects.filter(route=route.id)[:1]
-            if len(pics) != 0:
-                for pic in pics:
-                    route.photo = pic.image
-            else:
-                route.photo = "No pic"
-            
-            route_info.append(route)
-        return route_info
 
     # Generate count of some of the main objects
     num_route = Route.objects.all().count()
@@ -47,7 +48,7 @@ def index(request):
     latest_routes = get_route_info(latest)
 
     # Select 3 routes with the highest score
-    highest = RouteComment.objects.all().order_by('-score')[:3]
+    highest = RouteComment.objects.annotate().order_by('-score')[:3]
     highest_routes = get_route_info(highest)
 
     context = {
@@ -60,8 +61,40 @@ def index(request):
     # Render the HTML template index.html with the data from context
     return render(request, 'index.html', context=context)
 
-class RouteListView(generic.ListView):
-    model = Route
+def RouteListByTypeView (request, sel, pk):
+    """ View function to list the routes by type """
+    context = {}
+    # Select the routes
+    print(sel)
+    if sel == 1:
+        route_text = 'All available routes'
+        route_list = Route.objects.all()
+    if sel == 2:
+        route_list = Route.objects.filter(type = pk)
+        type_name = Type.objects.get(pk=pk)
+        route_text = 'Routes by type: {}'.format(type_name)
+    if sel == 3:
+        route_list = Route.objects.filter(province=pk)
+        province_name = Province.objects.get(pk=pk)
+        route_text = 'Routes by province: {}'.format(province_name)
+
+    route_set = get_route_info(route_list)
+
+    # Select the route types
+    types = Type.objects.all()
+
+    # Select the provinces
+    provinces = Province.objects.all()
+    
+    context = {
+        'route_list': route_set,
+        'route_text': route_text,
+        'types': types,
+        'provinces': provinces,
+    }
+
+    return render(request, 'route_list.html', context= context)
+
 
 class RouteDetailView(generic.DetailView):
     model = Route
@@ -239,7 +272,15 @@ def RouteMapAll(request):
     my_map.add_to(figure)
 
     for hike in routes:
-        print (hike.gpx)
+
+        print (hike.type)
+        if hike.type.name == "Trage Tocht":
+            color = "blue"
+        else:
+            if hike.type.name == "Klompenpad":
+                color = "red"
+            else:
+                color = "green"
 
         gpxfile = hike.gpx
 
@@ -255,7 +296,7 @@ def RouteMapAll(request):
                     points.append(tuple([point.latitude, point.longitude]))
 
         # Add route to map
-        folium.PolyLine(points, color = "red", popup = hike.name, weight=2.5, opacity=1).add_to(my_map)
+        folium.PolyLine(points, color = color, popup = hike.name, weight=2.5, opacity=1).add_to(my_map)
 
     figure.render()
 

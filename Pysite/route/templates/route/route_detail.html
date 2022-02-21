@@ -11,6 +11,7 @@
     <h1>Route: {{ route.name }}</h1>
 
     <p><strong>Length:</strong> {{ route.length }} km</p>
+    <p><strong>Type:</strong> {{ route.type }}</p>
     <p><strong>Province:</strong> {{ route.province }}</p>
     <p> {{ map.html.render|safe }} </p>
     <script>
@@ -19,15 +20,16 @@
 
     {% for comm in route.routecomment_set.all %}
         <hr>
-        <p><strong> {{ comm.author }}, {{ comm.date|date:'d-m-Y' }}</strong> </p>
-        <p> Score: {{ comm.score }} </p>
-        <p> {{ comm.comment }} </p>
+        <div class="row comment">
+            <p><strong> {{ comm.author }}, {{ comm.date|date:'d-m-Y' }}</strong> </p>
+            <p> Score: {{ comm.score }} </p>
+            <p> {{ comm.comment }} </p>
+        </div>
     {% endfor %}
 
     {% for photo in route.routephoto_set.all %}
         <hr>
         <img class="detail_foto" src="{{ photo.image.url }}" alt="connect">
-        <p> {{ photo.image }} </p>
         <p> {{ photo.comment }} </p>
     {% endfor %}   
 
